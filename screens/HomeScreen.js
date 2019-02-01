@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
 
@@ -19,22 +20,55 @@ export default class HomeScreen extends React.Component {
     header: null,
   };
 
+  // getInitialState() {
+  //   return { urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg' }
+  // }
+
+
   state = {
-    // urlTemplate: 'http://myith.com/map/tiled/{z}/{x}/{y}.jpg'
-    urlTemplate: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg',
+    // urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    region: {
+      latitude: this.tile2lat(0, 0),
+      longitude: this.tile2long(0, 0),
+      latitudeDelta: 0.28,
+      longitudeDelta: 0.28,
+    },
+  };
+  constructor(props) {
+    super(props);
+
   }
+
+  tile2long(x, z) {
+    return (x / Math.pow(2, z) * 360 - 180);
+  }
+  tile2lat(y, z) {
+    var n = Math.PI - 2 * Math.PI * y / Math.pow(2, z);
+    return (180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))));
+  }
+
+
+  onRegionChange = (region) => {
+    this.setState({ region });
+  }
+
 
   render() {
     return (
       <View style={styles.container}>
         <MapView
           style={styles.map}
-          onRegionChangeComplete={mapRegion => this.setState({ mapRegion })}
-          region={this.state.mapRegion}
+          region={this.state.region}
+          onRegionChange={this.onRegionChange}
+          mapType={"none"}
+          enableZoomControl
+          maxZoomLevel={3}
         >
           <UrlTile
             urlTemplate={this.state.urlTemplate}
-            maximumZ={3}
+
+          // zIndex={1}
           />
         </MapView>
       </View>

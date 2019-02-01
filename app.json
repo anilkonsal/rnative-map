@@ -25,10 +25,5 @@
     "ios": {
       "supportsTablet": true
     },
-    "infoPlist": {
-      "NSAppTransportSecurity": {
-        "NSAllowsArbitraryLoads": true
-      }
-    }
   }
 }
