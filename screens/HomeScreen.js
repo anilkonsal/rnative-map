@@ -9,11 +9,20 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
-  Alert
+  Alert,
+  File,
+  Button
 } from 'react-native';
 import { WebBrowser } from 'expo';
 
 const { width, height } = Dimensions.get('window');
+const ASPECT_RATIO = width / height
+const LATITUDE_DELTA = 90 //Very high zoom level
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO
+
+
+
+console.log(LONGITUDE_DELTA);
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -25,20 +34,22 @@ export default class HomeScreen extends React.Component {
   // }
 
 
-  state = {
-    urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg',
-    // urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    region: {
-      latitude: this.tile2lat(0, 0),
-      longitude: this.tile2long(0, 0),
-      latitudeDelta: 0.28,
-      longitudeDelta: 0.28,
-    },
-  };
   constructor(props) {
     super(props);
+    this.state = {
+      urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg',
+      // urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      region: {
+        latitude: this.tile2lat(0, 0),
+        longitude: this.tile2long(0, 0),
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      },
 
+    };
   }
+
+
 
   tile2long(x, z) {
     return (x / Math.pow(2, z) * 360 - 180);
@@ -50,28 +61,56 @@ export default class HomeScreen extends React.Component {
 
 
   onRegionChange = (region) => {
-    this.setState({ region });
+    this.setState({ region, zoom: Math.round(Math.log(360 / region.longitudeDelta) / Math.LN2) });
+
   }
 
+  componentDidMount(props) {
+
+  }
+
+  onZoomInPress() {
+    console.log(this.state)
+    const region = {
+      latitude: this.state.region.latitude,
+      longitude: this.state.region.longitude,
+      latitudeDelta: this.state.region.latitudeDelta * 2,
+      longitudeDelta: this.state.region.longitudeDelta * 2,
+    }
+    this.map.animateToRegion(region, 100);
+  }
+
+  onZoomOutPress() {
+
+  }
 
   render() {
+
     return (
       <View style={styles.container}>
+        <View style={styles.topPanel}>
+          <Text>Zoom Level: {this.state.zoom}</Text>
+        </View>
         <MapView
+
           style={styles.map}
           region={this.state.region}
           onRegionChange={this.onRegionChange}
           mapType={"none"}
-          enableZoomControl
-          maxZoomLevel={3}
+          ref={ref => this.map = ref}
         >
           <UrlTile
             urlTemplate={this.state.urlTemplate}
-
-          // zIndex={1}
+            zIndex={1}
           />
         </MapView>
+        <View style={styles.zoomControl}>
+          <Button onPress={() => this.onZoomInPress()} style={styles.zoomInButton} title='+' />
+          <Button onPress={() => this.onZoomOutPress()} style={styles.zoomOutButton} title='-' />
+        </View>
+
       </View>
+
     );
   }
 }
@@ -80,6 +119,46 @@ const styles = StyleSheet.create({
   map: {
     position: 'absolute',
     top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  zoomControl: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    height: 100,
+    backgroundColor: '#fff',
+    width: 40
+  },
+  zoomInButton: {
+    height: 20,
+    backgroundColor: 'red',
+    width: 20
+  },
+  zoomOutButton: {
+    height: 20,
+    backgroundColor: 'red',
+    width: 20,
+    marginTop: 40
+  },
+  topPanel: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: 80,
+    backgroundColor: '#fff',
+    zIndex: 10,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center'
+  },
+
+  bottom: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    height: 100,
     left: 0,
     right: 0,
     bottom: 0,
