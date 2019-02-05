@@ -29,15 +29,11 @@ export default class HomeScreen extends React.Component {
     header: null,
   };
 
-  // getInitialState() {
-  //   return { urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg' }
-  // }
-
 
   constructor(props) {
     super(props);
     this.state = {
-      urlTemplate: 'https://www.pentarem.com/wp-content/map/tiled/{z}/{x}/{y}.jpg',
+      urlTemplate: `https://${process.env.TILE_SERVER_HOST}/tiled/{z}/{x}/{y}.jpg`,
       // urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       region: {
         latitude: this.tile2lat(0, 0),
